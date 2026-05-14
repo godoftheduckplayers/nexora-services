@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.nexora</groupId>
-  <artifactId>nexora-aggregator</artifactId>
+  <artifactId>nexora-services</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
-  <name>Nexora Aggregator</name>
+  <name>Nexora Services</name>
   <description>Parent POM (Maven reactor) for Nexora projects. Add &lt;module&gt; entries when subprojects exist.</description>
 
   <properties>
@@ -19,13 +19,7 @@
   </properties>
 
   <modules>
-    <module>../nexora-hamm</module>
-    <module>../nexora-buzz</module>
-    <module>../nexora-woody</module>
-    <module>../nexora-rex</module>
-    <module>../nexora-jessie</module>
-    <module>../nexora-slinky</module>
-    <module>../nexora-bo-peep</module>
+    <module>apps/nexora-scooby-doo</module>
   </modules>
 
   <build>
