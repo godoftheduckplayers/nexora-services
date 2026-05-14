@@ -1,3 +1,23 @@
 spring:
   application:
-    name: nexora-scooby-doo
+    name: ${SPRING_APPLICATION_NAME:nexora-scooby-doo}
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_FIRST
+            - DedupeResponseHeader=Access-Control-Allow-Credentials, RETAIN_FIRST
+            - DedupeResponseHeader=Vary, RETAIN_FIRST
+          routes:
+            - id: nexora-fred
+              uri: ${NEXORA_FRED}
+              predicates:
+                - Path=/nexora-fred/**
+              filters:
+                - StripPrefix=1
+  mvc:
+    log-request-details: true
+
+server:
+  port: ${PORT}

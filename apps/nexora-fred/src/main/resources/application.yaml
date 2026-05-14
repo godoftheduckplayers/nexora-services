@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:nexora-fred}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/nexora
+
+server:
+  port: ${PORT}
+
+keycloak:
+  url: http://localhost:8081
+  realm: nexora
+  client-id: nexora-fred
+  client-secret: ORwsUqmaYHBgqmyZdGASjxy7qKHByJLc

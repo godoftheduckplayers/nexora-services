@@ -20,6 +20,7 @@
 
   <modules>
     <module>apps/nexora-scooby-doo</module>
+    <module>apps/nexora-fred</module>
   </modules>
 
   <build>
