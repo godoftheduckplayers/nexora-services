@@ -1,5 +1,6 @@
-package com.nexora.fred.client;
+package com.nexora.fred.keycloak.client;
 
+import com.nexora.fred.keycloak.dto.request.KeycloakUpdateUserRequest;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -19,4 +20,13 @@ public interface KeycloakAdminClient {
       @PathVariable String realm,
       @PathVariable String userId,
       @RequestBody List<String> actions);
+
+  @PutMapping(
+      value = "/admin/realms/{realm}/users/{userId}",
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  void updateUser(
+      @RequestHeader("Authorization") String authorization,
+      @PathVariable String realm,
+      @PathVariable String userId,
+      @RequestBody KeycloakUpdateUserRequest request);
 }

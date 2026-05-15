@@ -1,6 +1,6 @@
-package com.nexora.fred.controller;
+package com.nexora.fred.security.controller;
 
-import com.nexora.fred.service.ProfileSecurityService;
+import com.nexora.fred.security.service.ProfileSecurityService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;

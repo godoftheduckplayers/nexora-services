@@ -1,6 +1,6 @@
-package com.nexora.fred.client;
+package com.nexora.fred.keycloak.client;
 
-import java.util.Map;
+import com.nexora.fred.keycloak.dto.response.KeycloakTokenResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.util.MultiValueMap;
@@ -14,6 +14,6 @@ public interface KeycloakTokenClient {
   @PostMapping(
       value = "/realms/{realm}/protocol/openid-connect/token",
       consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  Map<String, Object> getToken(
+  KeycloakTokenResponse getToken(
       @PathVariable String realm, @RequestBody MultiValueMap<String, String> form);
 }
