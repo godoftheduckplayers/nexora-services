@@ -4,7 +4,7 @@ spring:
 
   data:
     mongodb:
-      uri: "mongodb://godoftheduckplayers:29MBq8FAr8RnSX@localhost:27017/nexora_velma?authSource=admin"
+      uri: ${MONGODB_URI}
 
   security:
     oauth2:
