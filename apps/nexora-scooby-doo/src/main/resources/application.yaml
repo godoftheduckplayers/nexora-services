@@ -16,6 +16,12 @@ spring:
                 - Path=/nexora-fred/**
               filters:
                 - StripPrefix=1
+            - id: nexora-velma
+              uri: ${NEXORA_VELMA}
+              predicates:
+                - Path=/nexora-velma/**
+              filters:
+                - StripPrefix=1
   mvc:
     log-request-details: true
 
