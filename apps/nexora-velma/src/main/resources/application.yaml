@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:nexora-velma}
+
+  data:
+    mongodb:
+      uri: "mongodb://godoftheduckplayers:29MBq8FAr8RnSX@localhost:27017/nexora_velma?authSource=admin"
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
+server:
+  port: ${PORT:8080}
+
+keycloak:
+  url: ${KEYCLOAK_URL}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
