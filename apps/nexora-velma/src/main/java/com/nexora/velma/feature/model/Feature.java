@@ -8,18 +8,21 @@ import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
 @Setter
 @Document(collection = "features")
+@CompoundIndex(name = "uk_feature_app_key", def = "{'appKey': 1, 'key': 1}", unique = true)
 public class Feature {
 
   @Id private String id;
 
-  @Indexed(unique = true)
-  private String key;
+  @Indexed private String appKey;
+
+  @Indexed private String key;
 
   private String name;
   private String description;
@@ -30,11 +33,12 @@ public class Feature {
   private Instant createdAt;
   private Instant updatedAt;
 
-  public static Feature from(CreateFeatureRequest request) {
+  public static Feature from(String appKey, CreateFeatureRequest request) {
     Instant now = Instant.now();
 
     Feature feature = new Feature();
 
+    feature.setAppKey(appKey);
     feature.setKey(request.key());
     feature.setName(request.name());
     feature.setDescription(request.description());
@@ -56,14 +60,27 @@ public class Feature {
     this.updatedAt = Instant.now();
   }
 
+  public void enable() {
+    this.enabled = true;
+    this.updatedAt = Instant.now();
+  }
+
+  public void disable() {
+    this.enabled = false;
+    this.updatedAt = Instant.now();
+  }
+
   public FeatureResponse toDto() {
     return new FeatureResponse(
         this.id,
         this.key,
+        this.appKey,
         this.name,
         this.description,
         this.category,
         this.enabled,
-        this.globalEnabled);
+        this.globalEnabled,
+        this.createdAt,
+        this.updatedAt);
   }
 }

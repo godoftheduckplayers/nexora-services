@@ -5,6 +5,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE:nexora_velma}
 
   security:
     oauth2:
