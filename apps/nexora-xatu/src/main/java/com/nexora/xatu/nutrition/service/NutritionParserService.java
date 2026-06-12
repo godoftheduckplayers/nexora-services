@@ -1,9 +1,9 @@
-package com.nexora.xatu.extraction.service;
+package com.nexora.xatu.nutrition.service;
 
-import com.nexora.xatu.extraction.dto.NutritionOcrResponse;
-import com.nexora.xatu.extraction.enums.NutritionTableFormat;
-import com.nexora.xatu.extraction.service.parser.NutritionParserStrategy;
-import com.nexora.xatu.extraction.service.parser.NutritionTableLayoutDetector;
+import com.nexora.xatu.nutrition.dto.NutritionOcrResponse;
+import com.nexora.xatu.nutrition.enums.NutritionTableFormat;
+import com.nexora.xatu.nutrition.service.parser.NutritionParserStrategy;
+import com.nexora.xatu.nutrition.service.parser.NutritionTableLayoutDetector;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

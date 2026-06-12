@@ -1,9 +1,9 @@
-package com.nexora.xatu.extraction.service.parser;
+package com.nexora.xatu.nutrition.service.parser;
 
-import com.nexora.xatu.dto.NutritionFactResponse;
-import com.nexora.xatu.extraction.dto.NutritionOcrResponse;
-import com.nexora.xatu.extraction.enums.NutritionTableFormat;
-import com.nexora.xatu.extraction.model.NutritionValue;
+import com.nexora.xatu.nutrition.dto.NutritionFactResponse;
+import com.nexora.xatu.nutrition.dto.NutritionOcrResponse;
+import com.nexora.xatu.nutrition.enums.NutritionTableFormat;
+import com.nexora.xatu.nutrition.model.NutritionValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

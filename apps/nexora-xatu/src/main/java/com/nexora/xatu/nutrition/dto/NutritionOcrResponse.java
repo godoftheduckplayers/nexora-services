@@ -1,6 +1,5 @@
-package com.nexora.xatu.extraction.dto;
+package com.nexora.xatu.nutrition.dto;
 
-import com.nexora.xatu.dto.NutritionFactResponse;
 import java.util.List;
 
 public record NutritionOcrResponse(

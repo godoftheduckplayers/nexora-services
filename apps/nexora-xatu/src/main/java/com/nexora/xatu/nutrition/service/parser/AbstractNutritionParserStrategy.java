@@ -1,6 +1,6 @@
-package com.nexora.xatu.extraction.service.parser;
+package com.nexora.xatu.nutrition.service.parser;
 
-import com.nexora.xatu.extraction.model.NutritionValue;
+import com.nexora.xatu.nutrition.model.NutritionValue;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,7 @@
-package com.nexora.xatu.extraction.controller;
+package com.nexora.xatu.nutrition.controller;
 
-import com.nexora.xatu.extraction.dto.NutritionOcrResponse;
-import com.nexora.xatu.extraction.service.NutritionOcrService;
+import com.nexora.xatu.nutrition.dto.NutritionOcrResponse;
+import com.nexora.xatu.nutrition.service.NutritionOcrService;
 import java.io.File;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;

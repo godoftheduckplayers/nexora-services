@@ -1,4 +1,4 @@
-package com.nexora.xatu.extraction.enums;
+package com.nexora.xatu.nutrition.enums;
 
 public enum NutritionTableFormat {
   SINGLE_AMOUNT,

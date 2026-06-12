@@ -1,4 +1,4 @@
-package com.nexora.xatu.extraction.service.ocr;
+package com.nexora.xatu.nutrition.service.ocr;
 
 import java.awt.image.BufferedImage;
 import net.sourceforge.tess4j.Tesseract;

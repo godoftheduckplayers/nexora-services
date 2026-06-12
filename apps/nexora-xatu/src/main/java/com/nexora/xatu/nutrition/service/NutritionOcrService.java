@@ -1,7 +1,7 @@
-package com.nexora.xatu.extraction.service;
+package com.nexora.xatu.nutrition.service;
 
-import com.nexora.xatu.extraction.dto.NutritionOcrResponse;
-import com.nexora.xatu.extraction.service.ocr.NutritionTableOcrService;
+import com.nexora.xatu.nutrition.dto.NutritionOcrResponse;
+import com.nexora.xatu.nutrition.service.ocr.NutritionTableOcrService;
 import java.io.File;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

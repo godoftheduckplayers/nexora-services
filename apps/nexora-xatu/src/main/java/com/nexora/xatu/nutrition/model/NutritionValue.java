@@ -1,3 +1,3 @@
-package com.nexora.xatu.extraction.model;
+package com.nexora.xatu.nutrition.model;
 
 public record NutritionValue(String value, String unit) {}

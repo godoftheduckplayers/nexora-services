@@ -1,6 +1,6 @@
-package com.nexora.xatu.extraction.service.parser;
+package com.nexora.xatu.nutrition.service.parser;
 
-import com.nexora.xatu.extraction.enums.NutritionTableFormat;
+import com.nexora.xatu.nutrition.enums.NutritionTableFormat;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.nexora.xatu.extraction.service;
+package com.nexora.xatu.nutrition.service;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
