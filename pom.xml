@@ -22,6 +22,7 @@
     <module>apps/nexora-scooby-doo</module>
     <module>apps/nexora-fred</module>
     <module>apps/nexora-velma</module>
+    <module>apps/nexora-xatu</module>
   </modules>
 
   <build>
