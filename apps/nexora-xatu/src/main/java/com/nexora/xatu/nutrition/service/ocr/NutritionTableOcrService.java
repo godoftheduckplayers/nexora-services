@@ -14,7 +14,12 @@ public class NutritionTableOcrService {
 
       Tesseract tesseract = new Tesseract();
 
-      tesseract.setDatapath("/usr/share/tesseract-ocr/5/tessdata");
+      String dataPath = System.getenv("TESSDATA_PREFIX");
+      if (dataPath == null || dataPath.isBlank()) {
+        dataPath = "/usr/share/tessdata";
+      }
+
+      tesseract.setDatapath(dataPath);
       tesseract.setLanguage("por+eng");
 
       tesseract.setPageSegMode(11);

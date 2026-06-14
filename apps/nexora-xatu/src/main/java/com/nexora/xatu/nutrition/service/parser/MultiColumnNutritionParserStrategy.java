@@ -21,7 +21,7 @@ public class MultiColumnNutritionParserStrategy extends AbstractNutritionParserS
     int index = 0;
 
     while (index < lines.size()) {
-      String nutrient = normalizeNutrient(lines.get(index));
+      String nutrient = resolveNutrientName(lines.get(index));
 
       if (nutrient == null) {
         index++;
@@ -62,7 +62,7 @@ public class MultiColumnNutritionParserStrategy extends AbstractNutritionParserS
     for (int index = startIndex; index < Math.min(lines.size(), startIndex + 5); index++) {
       String line = lines.get(index);
 
-      if (normalizeNutrient(line) != null) {
+      if (resolveNutrientName(line) != null) {
         break;
       }
 

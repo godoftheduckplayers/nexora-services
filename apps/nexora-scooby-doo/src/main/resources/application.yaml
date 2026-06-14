@@ -22,6 +22,12 @@ spring:
                 - Path=/nexora-velma/**
               filters:
                 - StripPrefix=1
+            - id: nexora-xatu
+              uri: ${NEXORA_XATU}
+              predicates:
+                - Path=/nexora-xatu/**
+              filters:
+                - StripPrefix=1
   mvc:
     log-request-details: true
 

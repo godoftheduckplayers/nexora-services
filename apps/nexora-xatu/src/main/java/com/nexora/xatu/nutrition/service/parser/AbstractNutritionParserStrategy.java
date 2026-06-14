@@ -16,8 +16,10 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
       String normalizedLine =
           line.trim()
               .replace("Og", "0g")
+              .replace("Omg", "0mg")
               .replace("O9", "0g")
               .replace("Oy", "0g")
+              .replace("Img", "1mg")
               .replace("D,", "0,")
               .replace("%j", "kj")
               .replace("9)", "g)")
@@ -32,7 +34,35 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     return lines;
   }
 
-  protected String normalizeNutrient(String line) {
+  protected String resolveNutrientName(String line) {
+    String knownNutrient = normalizeKnownNutrient(line);
+
+    if (knownNutrient != null) {
+      return knownNutrient;
+    }
+
+    if (looksLikeNutrientLine(line)) {
+      return formatNutrientLabel(line);
+    }
+
+    return null;
+  }
+
+  protected boolean looksLikeNutrientLine(String line) {
+    String trimmedLine = line.trim();
+
+    if (trimmedLine.isEmpty() || isSkippableLine(trimmedLine)) {
+      return false;
+    }
+
+    if (looksLikeAmount(trimmedLine) || looksLikeDailyValue(trimmedLine)) {
+      return false;
+    }
+
+    return trimmedLine.matches(".*[\\p{L}].*") && trimmedLine.length() <= 80;
+  }
+
+  private String normalizeKnownNutrient(String line) {
     String normalized = removeAccents(line).toLowerCase();
 
     if (normalized.contains("valor energetico")) {
@@ -78,18 +108,26 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
       return "Gorduras Trans";
     }
 
+    if (normalized.contains("colesterol")) {
+      return "Colesterol";
+    }
+
     if (normalized.contains("fibra alimentar")
         || normalized.contains("fibras alimentares")
         || normalized.contains("fa amena")) {
       return "Fibra Alimentar";
     }
 
-    if (normalized.contains("sodio") || normalized.equals("eso")) {
+    if (normalized.contains("sodio") || normalized.contains("sedio") || normalized.equals("eso")) {
       return "Sódio";
     }
 
     if (normalized.contains("calcio")) {
       return "Cálcio";
+    }
+
+    if (normalized.contains("ferro")) {
+      return "Ferro";
     }
 
     if (normalized.contains("cafeina")) {
@@ -99,43 +137,59 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     return null;
   }
 
+  private boolean isSkippableLine(String line) {
+    String normalized = removeAccents(line).toLowerCase();
+
+    return normalized.contains("informacao nutricional")
+        || normalized.contains("tabela nutricional")
+        || (normalized.contains("quant") && normalized.contains("porcao"))
+        || normalized.matches(".*%\\s*vd.*")
+        || normalized.contains("valores diarios")
+        || normalized.contains("valor diario")
+        || normalized.contains("necessidades energeticas")
+        || normalized.contains("referencia com base")
+        || normalized.contains("fonte:")
+        || normalized.startsWith("porcao de")
+        || normalized.startsWith("*");
+  }
+
+  private String formatNutrientLabel(String line) {
+    String cleaned = line.trim().replaceAll("\\s+", " ");
+
+    if (cleaned.isEmpty()) {
+      return cleaned;
+    }
+
+    String[] words = cleaned.split(" ");
+    StringBuilder formatted = new StringBuilder();
+
+    for (int index = 0; index < words.length; index++) {
+      String word = words[index];
+
+      if (word.isBlank()) {
+        continue;
+      }
+
+      if (index > 0) {
+        formatted.append(' ');
+      }
+
+      formatted
+          .append(Character.toUpperCase(word.charAt(0)))
+          .append(word.substring(1).toLowerCase());
+    }
+
+    return formatted.toString();
+  }
+
   protected String normalizeAmount(String value, String nutrient) {
-    String clean =
-        value
-            .toLowerCase()
-            .replace(" ", "")
-            .replace(".", ",")
-            .replace("=647kj", "")
-            .replace("kj", "")
-            .replaceAll("[^0-9,mgkcalg]", "");
+    NutritionValue nutritionValue = parseNutritionValue(value, nutrient);
 
-    if (clean.contains("kcal")) {
-      return extractNumber(clean) + "kcal";
-    }
-
-    if (clean.contains("mg")) {
-      return extractNumber(clean) + "mg";
-    }
-
-    if (clean.contains("g")) {
-      return extractNumber(clean) + "g";
-    }
-
-    String number = extractNumber(clean);
-
-    if (number == null) {
+    if (nutritionValue == null) {
       return null;
     }
 
-    if (nutrient.equals("Valor Energético")) {
-      return number + "kcal";
-    }
-
-    if (isMilligramNutrient(nutrient)) {
-      return number + "mg";
-    }
-
-    return normalizeGramNumber(number, nutrient) + "g";
+    return nutritionValue.value() + nutritionValue.unit();
   }
 
   protected String extractServingSize(String rawText) {
@@ -156,7 +210,7 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
   }
 
   protected boolean looksLikeDailyValue(String line) {
-    String normalized = line.trim();
+    String normalized = line.trim().replace("%", "");
 
     return normalized.equals("**") || normalized.matches("\\d{1,3}");
   }
@@ -168,15 +222,19 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
       return "**";
     }
 
-    return normalized.matches("\\d{1,3}") ? normalized + "%" : null;
+    if (normalized.matches("\\d{1,3}%?")) {
+      return normalized.endsWith("%") ? normalized : normalized + "%";
+    }
+
+    return null;
   }
 
-  private String normalizeGramNumber(String number, String nutrient) {
+  private String normalizeGramNumber(String number) {
     if (number.contains(",")) {
       return trimLastOcrNoiseDecimal(number);
     }
 
-    if (isUsuallyIntegerGramNutrient(nutrient) && number.length() > 1 && number.endsWith("9")) {
+    if (number.length() > 1 && number.endsWith("9")) {
       return number.substring(0, number.length() - 1);
     }
 
@@ -199,19 +257,50 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     return parts[0] + "," + decimal;
   }
 
-  private boolean isUsuallyIntegerGramNutrient(String nutrient) {
-    return nutrient.equals("Carboidratos")
-        || nutrient.equals("Açúcares totais")
-        || nutrient.equals("Açúcares adicionados")
-        || nutrient.equals("Lactose")
-        || nutrient.equals("Proteínas")
-        || nutrient.equals("Gorduras totais")
-        || nutrient.equals("Gorduras Trans")
-        || nutrient.equals("Fibra Alimentar");
+  protected NutritionValue parseNutritionValue(String value, String nutrient) {
+    String compact =
+        value
+            .toLowerCase()
+            .replace(" ", "")
+            .replace(".", ",")
+            .replace("=647kj", "")
+            .replaceAll("[^0-9,mgkcalkj]", "");
+
+    String number = extractNumber(compact);
+
+    if (number == null) {
+      return null;
+    }
+
+    String unit = detectUnit(value, compact);
+
+    if (unit == null) {
+      return null;
+    }
+
+    if ("g".equals(unit)) {
+      return new NutritionValue(normalizeGramNumber(number), unit);
+    }
+
+    return new NutritionValue(number, unit);
   }
 
-  private boolean isMilligramNutrient(String nutrient) {
-    return nutrient.equals("Sódio") || nutrient.equals("Cálcio") || nutrient.equals("Cafeína");
+  private String detectUnit(String rawLine, String compact) {
+    String normalizedLine = rawLine.toLowerCase();
+
+    if (compact.contains("kcal") || normalizedLine.contains("kcal") || normalizedLine.contains("kj")) {
+      return "kcal";
+    }
+
+    if (compact.contains("mg") || normalizedLine.contains("mg")) {
+      return "mg";
+    }
+
+    if (compact.contains("g") || normalizedLine.matches(".*\\d+\\s*g.*")) {
+      return "g";
+    }
+
+    return null;
   }
 
   private String extractNumber(String text) {
@@ -222,35 +311,5 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
 
   protected String removeAccents(String value) {
     return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-  }
-
-  protected NutritionValue parseNutritionValue(String value, String nutrient) {
-
-    String normalized =
-        value
-            .toLowerCase()
-            .replace(" ", "")
-            .replace(".", ",")
-            .replace("=647kj", "")
-            .replace("kj", "")
-            .replaceAll("[^0-9,mgkcalg]", "");
-
-    String number = extractNumber(normalized);
-
-    if (number == null) {
-      return null;
-    }
-
-    if (normalized.contains("kcal") || nutrient.equals("Valor Energético")) {
-
-      return new NutritionValue(number, "kcal");
-    }
-
-    if (normalized.contains("mg") || isMilligramNutrient(nutrient)) {
-
-      return new NutritionValue(number, "mg");
-    }
-
-    return new NutritionValue(normalizeGramNumber(number, nutrient), "g");
   }
 }

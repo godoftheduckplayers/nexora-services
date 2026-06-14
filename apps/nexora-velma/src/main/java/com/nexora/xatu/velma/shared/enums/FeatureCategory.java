@@ -7,5 +7,6 @@ public enum FeatureCategory {
   NOTIFICATIONS,
   PLAN,
   PRIVACY,
-  PLATFORM
+  PLATFORM,
+  NUTRITION
 }
