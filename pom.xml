@@ -24,6 +24,7 @@
     <module>apps/nexora-velma</module>
     <module>apps/nexora-xatu</module>
     <module>apps/nexora-bayleef</module>
+    <module>apps/nexora-chansey</module>
   </modules>
 
   <build>

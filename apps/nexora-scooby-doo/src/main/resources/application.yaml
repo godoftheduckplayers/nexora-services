@@ -34,6 +34,12 @@ spring:
                 - Path=/nexora-bayleef/**
               filters:
                 - StripPrefix=1
+            - id: nexora-chansey
+              uri: ${NEXORA_CHANSEY}
+              predicates:
+                - Path=/nexora-chansey/**
+              filters:
+                - StripPrefix=1
   mvc:
     log-request-details: true
 

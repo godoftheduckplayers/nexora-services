@@ -1,0 +1,20 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/nexora_chansey_test
+      database: nexora_chansey_test
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/nexora
+
+nexora:
+  bayleef:
+    base-url: http://localhost:8086
+
+keycloak:
+  url: http://localhost:8081
+  realm: nexora
+  client-id: nexora-chansey
+  client-secret: test-secret
