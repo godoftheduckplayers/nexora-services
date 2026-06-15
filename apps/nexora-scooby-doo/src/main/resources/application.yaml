@@ -28,6 +28,12 @@ spring:
                 - Path=/nexora-xatu/**
               filters:
                 - StripPrefix=1
+            - id: nexora-bayleef
+              uri: ${NEXORA_BAYLEEF}
+              predicates:
+                - Path=/nexora-bayleef/**
+              filters:
+                - StripPrefix=1
   mvc:
     log-request-details: true
 
