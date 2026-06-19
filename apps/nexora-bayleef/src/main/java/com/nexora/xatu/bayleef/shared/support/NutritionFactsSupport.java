@@ -3,6 +3,7 @@ package com.nexora.xatu.bayleef.shared.support;
 import com.nexora.xatu.bayleef.shared.dto.NutritionFactRequest;
 import com.nexora.xatu.bayleef.shared.model.NutritionFact;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
+import com.nexora.xatu.bayleef.shared.model.ServingUnit;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.ArrayList;
@@ -132,6 +133,38 @@ public final class NutritionFactsSupport {
     }
 
     return BigDecimal.valueOf(100);
+  }
+
+  public static ServingUnit resolveServingUnit(ServingUnit explicitUnit, String servingSize) {
+    if (explicitUnit != null) {
+      return explicitUnit;
+    }
+
+    return ServingUnit.fromServingSizeLabel(servingSize);
+  }
+
+  public static String formatServingSizeLabel(BigDecimal amount, ServingUnit unit) {
+    if (amount == null) {
+      return null;
+    }
+
+    ServingUnit resolvedUnit = unit == null ? ServingUnit.G : unit;
+
+    return formatDecimal(amount) + resolvedUnit.label();
+  }
+
+  public static void validateMatchingUnits(ServingUnit foodUnit, ServingUnit quantityUnit) {
+    if (foodUnit == null || quantityUnit == null) {
+      return;
+    }
+
+    if (foodUnit != quantityUnit) {
+      throw new IllegalArgumentException(
+          "Consumption unit must match food serving unit: expected "
+              + foodUnit.label()
+              + ", received "
+              + quantityUnit.label());
+    }
   }
 
   public static List<NutritionFact> fromNutritionValues(NutritionValues values) {

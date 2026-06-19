@@ -5,6 +5,7 @@ import com.nexora.xatu.bayleef.consumption.dto.request.UpdateConsumptionRequest;
 import com.nexora.xatu.bayleef.consumption.dto.response.ConsumptionResponse;
 import com.nexora.xatu.bayleef.food.model.Food;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
+import com.nexora.xatu.bayleef.shared.model.ServingUnit;
 import com.nexora.xatu.bayleef.shared.support.NutritionFactsSupport;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,7 @@ public class FoodConsumption {
   private String foodId;
   private String foodName;
   private BigDecimal quantityGrams;
+  private ServingUnit quantityUnit;
   private LocalDate consumedOn;
   private Instant consumedAt;
 
@@ -37,6 +39,11 @@ public class FoodConsumption {
   public static FoodConsumption from(String userId, Food food, CreateConsumptionRequest request) {
     Instant consumedAt = request.consumedAt() == null ? Instant.now() : request.consumedAt();
     Instant now = Instant.now();
+    ServingUnit foodUnit =
+        NutritionFactsSupport.resolveServingUnit(
+            food.getReferenceServingUnit(), food.getServingSize());
+
+    NutritionFactsSupport.validateMatchingUnits(foodUnit, request.quantityUnit());
 
     FoodConsumption consumption = new FoodConsumption();
 
@@ -44,6 +51,7 @@ public class FoodConsumption {
     consumption.setFoodId(food.getId());
     consumption.setFoodName(food.getName());
     consumption.setQuantityGrams(request.quantityGrams());
+    consumption.setQuantityUnit(request.quantityUnit());
     consumption.setConsumedAt(consumedAt);
     consumption.setConsumedOn(LocalDate.ofInstant(consumedAt, ZoneOffset.UTC));
     consumption.setCreatedAt(now);
@@ -52,10 +60,26 @@ public class FoodConsumption {
     return consumption;
   }
 
-  public void update(UpdateConsumptionRequest request) {
+  public void update(UpdateConsumptionRequest request, Food food) {
+    Instant consumedAt = request.consumedAt() == null ? this.consumedAt : request.consumedAt();
+    ServingUnit foodUnit =
+        NutritionFactsSupport.resolveServingUnit(
+            food.getReferenceServingUnit(), food.getServingSize());
+
+    NutritionFactsSupport.validateMatchingUnits(foodUnit, request.quantityUnit());
+
+    this.quantityGrams = request.quantityGrams();
+    this.quantityUnit = request.quantityUnit();
+    this.consumedAt = consumedAt;
+    this.consumedOn = LocalDate.ofInstant(consumedAt, ZoneOffset.UTC);
+    this.updatedAt = Instant.now();
+  }
+
+  public void updateWithoutFood(UpdateConsumptionRequest request) {
     Instant consumedAt = request.consumedAt() == null ? this.consumedAt : request.consumedAt();
 
     this.quantityGrams = request.quantityGrams();
+    this.quantityUnit = request.quantityUnit();
     this.consumedAt = consumedAt;
     this.consumedOn = LocalDate.ofInstant(consumedAt, ZoneOffset.UTC);
     this.updatedAt = Instant.now();
@@ -74,12 +98,14 @@ public class FoodConsumption {
             referenceServingAmount,
             food.getNutritionPer100g(),
             this.quantityGrams);
+    ServingUnit unit = resolveQuantityUnit();
 
     return new ConsumptionResponse(
         this.id,
         this.foodId,
         this.foodName,
         this.quantityGrams,
+        unit,
         this.consumedOn,
         this.consumedAt,
         nutritionPer100g,
@@ -92,9 +118,18 @@ public class FoodConsumption {
         this.foodId,
         this.foodName,
         this.quantityGrams,
+        resolveQuantityUnit(),
         this.consumedOn,
         this.consumedAt,
         NutritionValues.empty(),
         NutritionValues.empty());
+  }
+
+  private ServingUnit resolveQuantityUnit() {
+    if (this.quantityUnit != null) {
+      return this.quantityUnit;
+    }
+
+    return ServingUnit.G;
   }
 }

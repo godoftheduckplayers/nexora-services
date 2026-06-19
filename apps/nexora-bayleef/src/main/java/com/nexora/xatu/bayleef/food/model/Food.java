@@ -6,6 +6,7 @@ import com.nexora.xatu.bayleef.food.dto.response.FoodResponse;
 import com.nexora.xatu.bayleef.shared.dto.NutritionFactRequest;
 import com.nexora.xatu.bayleef.shared.model.NutritionFact;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
+import com.nexora.xatu.bayleef.shared.model.ServingUnit;
 import com.nexora.xatu.bayleef.shared.support.NutritionFactsSupport;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,6 +29,7 @@ public class Food {
   private String name;
   private String servingSize;
   private BigDecimal referenceServingGrams;
+  private ServingUnit referenceServingUnit;
   private List<NutritionFact> nutritionFacts;
   private NutritionValues nutritionPer100g;
 
@@ -39,7 +41,12 @@ public class Food {
     Food food = new Food();
 
     food.setUserId(userId);
-    food.applyPayload(request.name(), request.servingSize(), request.referenceServingGrams(), request.nutritionFacts());
+    food.applyPayload(
+        request.name(),
+        request.servingSize(),
+        request.referenceServingGrams(),
+        request.referenceServingUnit(),
+        request.nutritionFacts());
     food.setCreatedAt(now);
     food.setUpdatedAt(now);
 
@@ -47,7 +54,12 @@ public class Food {
   }
 
   public void update(UpdateFoodRequest request) {
-    this.applyPayload(request.name(), request.servingSize(), request.referenceServingGrams(), request.nutritionFacts());
+    this.applyPayload(
+        request.name(),
+        request.servingSize(),
+        request.referenceServingGrams(),
+        request.referenceServingUnit(),
+        request.nutritionFacts());
     this.updatedAt = Instant.now();
   }
 
@@ -55,14 +67,20 @@ public class Food {
       String name,
       String servingSize,
       BigDecimal referenceServingGrams,
+      ServingUnit referenceServingUnit,
       List<NutritionFactRequest> nutritionFacts) {
     this.name = name.trim();
-    this.servingSize = NutritionFactsSupport.normalizeServingSizeLabel(servingSize);
+    this.referenceServingUnit =
+        NutritionFactsSupport.resolveServingUnit(referenceServingUnit, servingSize);
     this.referenceServingGrams =
         referenceServingGrams != null
             ? referenceServingGrams
             : NutritionFactsSupport.parseReferenceServingAmount(servingSize);
+    this.servingSize =
+        NutritionFactsSupport.formatServingSizeLabel(
+            this.referenceServingGrams, this.referenceServingUnit);
     this.nutritionFacts = NutritionFactsSupport.fromRequests(nutritionFacts);
+    this.nutritionPer100g = null;
   }
 
   public FoodResponse toDto() {
@@ -73,6 +91,8 @@ public class Food {
     NutritionValues nutritionPer100g =
         NutritionFactsSupport.resolveNutritionPer100g(
             facts, referenceServingAmount, this.nutritionPer100g);
+    ServingUnit servingUnit =
+        NutritionFactsSupport.resolveServingUnit(this.referenceServingUnit, this.servingSize);
 
     if (facts == null || facts.isEmpty()) {
       facts = NutritionFactsSupport.fromNutritionValues(nutritionPer100g);
@@ -81,21 +101,23 @@ public class Food {
     return new FoodResponse(
         this.id,
         this.name,
-        resolveServingSizeLabel(),
+        resolveServingSizeLabel(servingUnit),
         this.referenceServingGrams,
+        servingUnit,
         facts.stream().map(NutritionFact::toDto).toList(),
         nutritionPer100g,
         this.createdAt,
         this.updatedAt);
   }
 
-  private String resolveServingSizeLabel() {
+  private String resolveServingSizeLabel(ServingUnit servingUnit) {
     if (this.servingSize != null && !this.servingSize.isBlank()) {
       return this.servingSize.trim();
     }
 
     if (this.referenceServingGrams != null) {
-      return this.referenceServingGrams.stripTrailingZeros().toPlainString().replace('.', ',') + "g";
+      return NutritionFactsSupport.formatServingSizeLabel(
+          this.referenceServingGrams, servingUnit);
     }
 
     return "100g";

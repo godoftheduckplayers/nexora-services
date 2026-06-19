@@ -14,6 +14,7 @@ import com.nexora.xatu.bayleef.shared.service.JwtUserService;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -83,11 +84,17 @@ public class ConsumptionService {
   public ConsumptionResponse update(Jwt jwt, String id, UpdateConsumptionRequest request) {
     FoodConsumption consumption = findEntity(jwt, id);
 
-    consumption.update(request);
+    Optional<Food> food = foodService.findEntityOptional(jwt, consumption.getFoodId());
 
-    Food food = foodService.findEntity(jwt, consumption.getFoodId());
+    if (food.isPresent()) {
+      consumption.update(request, food.get());
+    } else {
+      consumption.updateWithoutFood(request);
+    }
 
-    return consumptionRepository.save(consumption).toDto(food);
+    FoodConsumption saved = consumptionRepository.save(consumption);
+
+    return food.map(saved::toDto).orElseGet(saved::toDtoMissingFood);
   }
 
   public void delete(Jwt jwt, String id) {
