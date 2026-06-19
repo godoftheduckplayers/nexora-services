@@ -37,12 +37,11 @@ public class MultiColumnNutritionParserStrategy extends AbstractNutritionParserS
 
       String amount = pickPortionAmount(values, nutrient);
       NutritionValue nutritionValue = parseNutritionValue(amount, nutrient);
-      String dailyValue = pickDailyValue(values);
 
       if (nutritionValue != null) {
         facts.add(
             new NutritionFactResponse(
-                nutrient, nutritionValue.value(), nutritionValue.unit(), dailyValue));
+                nutrient, nutritionValue.value(), nutritionValue.unit()));
       }
 
       index += values.size() + 1;
@@ -66,7 +65,7 @@ public class MultiColumnNutritionParserStrategy extends AbstractNutritionParserS
         break;
       }
 
-      if (looksLikeAmount(line) || looksLikeDailyValue(line)) {
+      if (looksLikeAmount(line)) {
         values.add(line);
       }
     }
@@ -76,14 +75,6 @@ public class MultiColumnNutritionParserStrategy extends AbstractNutritionParserS
 
   private String pickPortionAmount(List<String> values, String nutrient) {
     return normalizeAmount(values.getFirst(), nutrient);
-  }
-
-  private String pickDailyValue(List<String> values) {
-    if (values.size() >= 3) {
-      return normalizeDailyValue(values.getLast());
-    }
-
-    return null;
   }
 
   @Override

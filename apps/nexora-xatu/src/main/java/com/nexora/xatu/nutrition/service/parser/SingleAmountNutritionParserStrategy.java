@@ -40,15 +40,9 @@ public class SingleAmountNutritionParserStrategy extends AbstractNutritionParser
         continue;
       }
 
-      String dailyValue = findDailyValue(lines, amountIndex + 1);
-
-      if (dailyValue == null && index > 0) {
-        dailyValue = findPrecedingDailyValue(lines, index - 1);
-      }
-
       facts.add(
           new NutritionFactResponse(
-              nutrient, nutritionValue.value(), nutritionValue.unit(), dailyValue));
+              nutrient, nutritionValue.value(), nutritionValue.unit()));
       index = amountIndex + 1;
     }
 
@@ -74,39 +68,5 @@ public class SingleAmountNutritionParserStrategy extends AbstractNutritionParser
     }
 
     return -1;
-  }
-
-  private String findDailyValue(List<String> lines, int startIndex) {
-    for (int index = startIndex; index < Math.min(lines.size(), startIndex + 2); index++) {
-      String line = lines.get(index);
-
-      if (resolveNutrientName(line) != null) {
-        return null;
-      }
-
-      if (looksLikeDailyValue(line)) {
-        return normalizeDailyValue(line);
-      }
-    }
-
-    return null;
-  }
-
-  private String findPrecedingDailyValue(List<String> lines, int index) {
-    if (index < 0 || index >= lines.size()) {
-      return null;
-    }
-
-    String line = lines.get(index);
-
-    if (resolveNutrientName(line) != null || looksLikeAmount(line)) {
-      return null;
-    }
-
-    if (looksLikeDailyValue(line)) {
-      return normalizeDailyValue(line);
-    }
-
-    return null;
   }
 }

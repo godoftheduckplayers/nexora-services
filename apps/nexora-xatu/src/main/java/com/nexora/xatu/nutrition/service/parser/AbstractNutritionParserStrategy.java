@@ -209,24 +209,10 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
         || normalized.matches("\\d+[,.]?\\d*");
   }
 
-  protected boolean looksLikeDailyValue(String line) {
+  private boolean looksLikeDailyValue(String line) {
     String normalized = line.trim().replace("%", "");
 
     return normalized.equals("**") || normalized.matches("\\d{1,3}");
-  }
-
-  protected String normalizeDailyValue(String line) {
-    String normalized = line.trim();
-
-    if (normalized.equals("**")) {
-      return "**";
-    }
-
-    if (normalized.matches("\\d{1,3}%?")) {
-      return normalized.endsWith("%") ? normalized : normalized + "%";
-    }
-
-    return null;
   }
 
   private String normalizeGramNumber(String number) {

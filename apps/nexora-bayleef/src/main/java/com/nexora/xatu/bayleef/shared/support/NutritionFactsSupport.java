@@ -51,7 +51,6 @@ public final class NutritionFactsSupport {
     fact.setNutrient(canonicalNutrient);
     fact.setValue(parsedAmount == null ? null : parsedAmount.value());
     fact.setUnit(parsedAmount == null ? null : parsedAmount.unit());
-    fact.setDailyValuePercentage(normalizeDailyValuePercentage(request.dailyValuePercentage()));
 
     return fact;
   }
@@ -168,7 +167,6 @@ public final class NutritionFactsSupport {
     fact.setNutrient(nutrient);
     fact.setValue(formatDecimal(amount));
     fact.setUnit(unit);
-    fact.setDailyValuePercentage(null);
 
     facts.add(fact);
   }
@@ -243,26 +241,6 @@ public final class NutritionFactsSupport {
     }
 
     return unit.trim();
-  }
-
-  private static String normalizeDailyValuePercentage(String rawValue) {
-    if (rawValue == null || rawValue.isBlank()) {
-      return null;
-    }
-
-    String normalized = rawValue.trim();
-
-    if (normalized.equals("**")) {
-      return "**";
-    }
-
-    String digits = normalized.replace("%", "").trim();
-
-    if (!digits.matches("\\d{1,3}")) {
-      return normalized;
-    }
-
-    return digits + "%";
   }
 
   private static String resolveCanonicalNutrientName(String rawNutrient) {
