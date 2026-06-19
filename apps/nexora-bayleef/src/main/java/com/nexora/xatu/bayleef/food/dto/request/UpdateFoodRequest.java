@@ -1,13 +1,16 @@
 package com.nexora.xatu.bayleef.food.dto.request;
 
-import com.nexora.xatu.bayleef.shared.dto.NutritionValuesRequest;
+import com.nexora.xatu.bayleef.shared.dto.NutritionFactRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 public record UpdateFoodRequest(
     @NotBlank @Size(max = 120) String name,
-    @Valid NutritionValuesRequest nutritionPer100g,
-    @Positive BigDecimal referenceServingGrams) {}
+    @Size(max = 64) String servingSize,
+    @Positive BigDecimal referenceServingGrams,
+    @NotEmpty @Valid List<NutritionFactRequest> nutritionFacts) {}

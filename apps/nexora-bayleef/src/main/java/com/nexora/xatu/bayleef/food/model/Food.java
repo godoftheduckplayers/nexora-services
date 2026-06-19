@@ -3,10 +3,13 @@ package com.nexora.xatu.bayleef.food.model;
 import com.nexora.xatu.bayleef.food.dto.request.CreateFoodRequest;
 import com.nexora.xatu.bayleef.food.dto.request.UpdateFoodRequest;
 import com.nexora.xatu.bayleef.food.dto.response.FoodResponse;
-import com.nexora.xatu.bayleef.shared.dto.NutritionValuesRequest;
+import com.nexora.xatu.bayleef.shared.dto.NutritionFactRequest;
+import com.nexora.xatu.bayleef.shared.model.NutritionFact;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
+import com.nexora.xatu.bayleef.shared.support.NutritionFactsSupport;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -23,6 +26,9 @@ public class Food {
 
   private String userId;
   private String name;
+  private String servingSize;
+  private BigDecimal referenceServingGrams;
+  private List<NutritionFact> nutritionFacts;
   private NutritionValues nutritionPer100g;
 
   private Instant createdAt;
@@ -33,9 +39,7 @@ public class Food {
     Food food = new Food();
 
     food.setUserId(userId);
-    food.setName(request.name().trim());
-    food.setNutritionPer100g(
-        normalizeNutritionPer100g(request.nutritionPer100g(), request.referenceServingGrams()));
+    food.applyPayload(request.name(), request.servingSize(), request.referenceServingGrams(), request.nutritionFacts());
     food.setCreatedAt(now);
     food.setUpdatedAt(now);
 
@@ -43,23 +47,53 @@ public class Food {
   }
 
   public void update(UpdateFoodRequest request) {
-    this.name = request.name().trim();
-    this.nutritionPer100g =
-        normalizeNutritionPer100g(request.nutritionPer100g(), request.referenceServingGrams());
+    this.applyPayload(request.name(), request.servingSize(), request.referenceServingGrams(), request.nutritionFacts());
     this.updatedAt = Instant.now();
   }
 
-  private static NutritionValues normalizeNutritionPer100g(
-      NutritionValuesRequest nutrition, BigDecimal referenceServingGrams) {
-    if (nutrition == null) {
-      return NutritionValues.empty();
-    }
-
-    return nutrition.toModel().normalizeFromServingToPer100g(referenceServingGrams);
+  private void applyPayload(
+      String name,
+      String servingSize,
+      BigDecimal referenceServingGrams,
+      List<NutritionFactRequest> nutritionFacts) {
+    this.name = name.trim();
+    this.servingSize = NutritionFactsSupport.normalizeServingSizeLabel(servingSize);
+    this.referenceServingGrams =
+        referenceServingGrams != null
+            ? referenceServingGrams
+            : NutritionFactsSupport.parseReferenceServingGrams(servingSize);
+    this.nutritionFacts = NutritionFactsSupport.fromRequests(nutritionFacts);
+    this.nutritionPer100g =
+        NutritionFactsSupport.deriveNutritionPer100g(this.nutritionFacts, this.referenceServingGrams);
   }
 
   public FoodResponse toDto() {
+    List<NutritionFact> facts = this.nutritionFacts;
+
+    if (facts == null || facts.isEmpty()) {
+      facts = NutritionFactsSupport.fromNutritionValues(this.nutritionPer100g);
+    }
+
     return new FoodResponse(
-        this.id, this.name, this.nutritionPer100g, this.createdAt, this.updatedAt);
+        this.id,
+        this.name,
+        resolveServingSizeLabel(),
+        this.referenceServingGrams,
+        facts.stream().map(NutritionFact::toDto).toList(),
+        this.nutritionPer100g,
+        this.createdAt,
+        this.updatedAt);
+  }
+
+  private String resolveServingSizeLabel() {
+    if (this.servingSize != null && !this.servingSize.isBlank()) {
+      return this.servingSize.trim();
+    }
+
+    if (this.referenceServingGrams != null) {
+      return this.referenceServingGrams.stripTrailingZeros().toPlainString().replace('.', ',') + "g";
+    }
+
+    return "100g";
   }
 }
