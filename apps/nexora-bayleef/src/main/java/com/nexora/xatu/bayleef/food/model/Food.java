@@ -61,17 +61,21 @@ public class Food {
     this.referenceServingGrams =
         referenceServingGrams != null
             ? referenceServingGrams
-            : NutritionFactsSupport.parseReferenceServingGrams(servingSize);
+            : NutritionFactsSupport.parseReferenceServingAmount(servingSize);
     this.nutritionFacts = NutritionFactsSupport.fromRequests(nutritionFacts);
-    this.nutritionPer100g =
-        NutritionFactsSupport.deriveNutritionPer100g(this.nutritionFacts, this.referenceServingGrams);
   }
 
   public FoodResponse toDto() {
     List<NutritionFact> facts = this.nutritionFacts;
+    BigDecimal referenceServingAmount =
+        NutritionFactsSupport.resolveReferenceServingAmount(
+            this.referenceServingGrams, this.servingSize);
+    NutritionValues nutritionPer100g =
+        NutritionFactsSupport.resolveNutritionPer100g(
+            facts, referenceServingAmount, this.nutritionPer100g);
 
     if (facts == null || facts.isEmpty()) {
-      facts = NutritionFactsSupport.fromNutritionValues(this.nutritionPer100g);
+      facts = NutritionFactsSupport.fromNutritionValues(nutritionPer100g);
     }
 
     return new FoodResponse(
@@ -80,7 +84,7 @@ public class Food {
         resolveServingSizeLabel(),
         this.referenceServingGrams,
         facts.stream().map(NutritionFact::toDto).toList(),
-        this.nutritionPer100g,
+        nutritionPer100g,
         this.createdAt,
         this.updatedAt);
   }

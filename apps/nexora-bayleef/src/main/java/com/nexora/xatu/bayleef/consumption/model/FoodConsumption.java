@@ -5,6 +5,7 @@ import com.nexora.xatu.bayleef.consumption.dto.request.UpdateConsumptionRequest;
 import com.nexora.xatu.bayleef.consumption.dto.response.ConsumptionResponse;
 import com.nexora.xatu.bayleef.food.model.Food;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
+import com.nexora.xatu.bayleef.shared.support.NutritionFactsSupport;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -61,11 +62,18 @@ public class FoodConsumption {
   }
 
   public ConsumptionResponse toDto(Food food) {
+    BigDecimal referenceServingAmount =
+        NutritionFactsSupport.resolveReferenceServingAmount(
+            food.getReferenceServingGrams(), food.getServingSize());
     NutritionValues nutritionPer100g =
-        food.getNutritionPer100g() == null
-            ? NutritionValues.empty()
-            : food.getNutritionPer100g().copy();
-    NutritionValues nutritionConsumed = nutritionPer100g.scale(this.quantityGrams);
+        NutritionFactsSupport.resolveNutritionPer100g(
+            food.getNutritionFacts(), referenceServingAmount, food.getNutritionPer100g());
+    NutritionValues nutritionConsumed =
+        NutritionFactsSupport.computeNutritionConsumed(
+            food.getNutritionFacts(),
+            referenceServingAmount,
+            food.getNutritionPer100g(),
+            this.quantityGrams);
 
     return new ConsumptionResponse(
         this.id,
@@ -76,5 +84,17 @@ public class FoodConsumption {
         this.consumedAt,
         nutritionPer100g,
         nutritionConsumed);
+  }
+
+  public ConsumptionResponse toDtoMissingFood() {
+    return new ConsumptionResponse(
+        this.id,
+        this.foodId,
+        this.foodName,
+        this.quantityGrams,
+        this.consumedOn,
+        this.consumedAt,
+        NutritionValues.empty(),
+        NutritionValues.empty());
   }
 }

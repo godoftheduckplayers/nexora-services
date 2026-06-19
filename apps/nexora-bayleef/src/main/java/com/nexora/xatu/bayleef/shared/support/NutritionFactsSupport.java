@@ -4,7 +4,6 @@ import com.nexora.xatu.bayleef.shared.dto.NutritionFactRequest;
 import com.nexora.xatu.bayleef.shared.model.NutritionFact;
 import com.nexora.xatu.bayleef.shared.model.NutritionValues;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,7 +55,12 @@ public final class NutritionFactsSupport {
   }
 
   public static NutritionValues deriveNutritionPer100g(
-      List<NutritionFact> facts, BigDecimal referenceServingGrams) {
+      List<NutritionFact> facts, BigDecimal referenceServingAmount) {
+    return deriveNutritionValuesFromFacts(facts)
+        .normalizeFromServingToPer100g(referenceServingAmount);
+  }
+
+  public static NutritionValues deriveNutritionValuesFromFacts(List<NutritionFact> facts) {
     NutritionValues values = NutritionValues.empty();
 
     if (facts == null || facts.isEmpty()) {
@@ -64,16 +68,70 @@ public final class NutritionFactsSupport {
     }
 
     for (NutritionFact fact : facts) {
-      BigDecimal amountPer100g = toAmountPer100g(fact.getValue(), referenceServingGrams);
+      BigDecimal amount = parseDecimal(fact.getValue());
 
-      if (amountPer100g == null) {
+      if (amount == null) {
         continue;
       }
 
-      applyKnownNutrient(values, normalizeNutrientKey(fact.getNutrient()), amountPer100g);
+      applyKnownNutrient(values, normalizeNutrientKey(fact.getNutrient()), amount);
     }
 
     return values;
+  }
+
+  public static NutritionValues resolveNutritionPer100g(
+      List<NutritionFact> facts,
+      BigDecimal referenceServingAmount,
+      NutritionValues legacyNutritionPer100g) {
+    if (facts != null && !facts.isEmpty()) {
+      return deriveNutritionPer100g(facts, referenceServingAmount);
+    }
+
+    if (legacyNutritionPer100g != null) {
+      return legacyNutritionPer100g.copy();
+    }
+
+    return NutritionValues.empty();
+  }
+
+  public static NutritionValues computeNutritionConsumed(
+      List<NutritionFact> facts,
+      BigDecimal referenceServingAmount,
+      NutritionValues legacyNutritionPer100g,
+      BigDecimal quantity) {
+    if (facts != null && !facts.isEmpty()) {
+      BigDecimal referenceAmount =
+          referenceServingAmount != null
+                  && referenceServingAmount.compareTo(BigDecimal.ZERO) > 0
+              ? referenceServingAmount
+              : BigDecimal.valueOf(100);
+
+      return deriveNutritionValuesFromFacts(facts)
+          .scaleToReferenceQuantity(quantity, referenceAmount);
+    }
+
+    if (legacyNutritionPer100g != null) {
+      return legacyNutritionPer100g.scale(quantity);
+    }
+
+    return NutritionValues.empty();
+  }
+
+  public static BigDecimal resolveReferenceServingAmount(
+      BigDecimal referenceServingAmount, String servingSize) {
+    if (referenceServingAmount != null
+        && referenceServingAmount.compareTo(BigDecimal.ZERO) > 0) {
+      return referenceServingAmount;
+    }
+
+    BigDecimal parsed = parseReferenceServingAmount(servingSize);
+
+    if (parsed != null) {
+      return parsed;
+    }
+
+    return BigDecimal.valueOf(100);
   }
 
   public static List<NutritionFact> fromNutritionValues(NutritionValues values) {
@@ -132,10 +190,15 @@ public final class NutritionFactsSupport {
   }
 
   public static BigDecimal parseReferenceServingGrams(String servingSize) {
+    return parseReferenceServingAmount(servingSize);
+  }
+
+  public static BigDecimal parseReferenceServingAmount(String servingSize) {
     String normalized = servingSize == null ? "" : removeAccents(servingSize).toLowerCase(Locale.ROOT);
 
     Matcher matcher =
-        Pattern.compile("(\\d+[,.]?\\d*)\\s*(?:g|gr|gramas?)\\b").matcher(normalized);
+        Pattern.compile("(\\d+[,.]?\\d*)\\s*(g|gr|gramas?|ml)\\b", Pattern.CASE_INSENSITIVE)
+            .matcher(normalized);
 
     if (matcher.find()) {
       return parseDecimal(matcher.group(1));
@@ -342,24 +405,6 @@ public final class NutritionFactsSupport {
     }
 
     return formatted.toString();
-  }
-
-  private static BigDecimal toAmountPer100g(String rawValue, BigDecimal referenceServingGrams) {
-    BigDecimal amount = parseDecimal(rawValue);
-
-    if (amount == null) {
-      return null;
-    }
-
-    if (referenceServingGrams == null
-        || referenceServingGrams.compareTo(BigDecimal.ZERO) <= 0
-        || referenceServingGrams.compareTo(BigDecimal.valueOf(100)) == 0) {
-      return amount.setScale(2, RoundingMode.HALF_UP);
-    }
-
-    return amount
-        .multiply(BigDecimal.valueOf(100))
-        .divide(referenceServingGrams, 2, RoundingMode.HALF_UP);
   }
 
   private static void applyKnownNutrient(

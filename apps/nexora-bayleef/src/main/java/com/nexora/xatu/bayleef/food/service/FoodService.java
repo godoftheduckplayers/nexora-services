@@ -7,6 +7,7 @@ import com.nexora.xatu.bayleef.food.model.Food;
 import com.nexora.xatu.bayleef.food.repository.FoodRepository;
 import com.nexora.xatu.bayleef.shared.dto.PageResponse;
 import com.nexora.xatu.bayleef.shared.service.JwtUserService;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -65,5 +66,11 @@ public class FoodService {
     return foodRepository
         .findByIdAndUserId(id, userId)
         .orElseThrow(() -> new IllegalArgumentException("Food not found: " + id));
+  }
+
+  public Optional<Food> findEntityOptional(Jwt jwt, String id) {
+    String userId = jwtUserService.requireUserId(jwt);
+
+    return foodRepository.findByIdAndUserId(id, userId);
   }
 }

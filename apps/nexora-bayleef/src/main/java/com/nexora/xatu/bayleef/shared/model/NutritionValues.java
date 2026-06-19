@@ -43,6 +43,19 @@ public class NutritionValues {
     return multiplyByFactor(factor);
   }
 
+  public NutritionValues scaleToReferenceQuantity(
+      BigDecimal quantity, BigDecimal referenceServingAmount) {
+    if (quantity == null
+        || referenceServingAmount == null
+        || referenceServingAmount.compareTo(BigDecimal.ZERO) <= 0) {
+      return copy();
+    }
+
+    BigDecimal factor = quantity.divide(referenceServingAmount, 8, RoundingMode.HALF_UP);
+
+    return multiplyByFactor(factor);
+  }
+
   public NutritionValues normalizeFromServingToPer100g(BigDecimal servingGrams) {
     if (servingGrams == null
         || servingGrams.compareTo(BigDecimal.ZERO) <= 0

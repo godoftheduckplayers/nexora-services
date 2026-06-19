@@ -105,8 +105,9 @@ public class ConsumptionService {
   }
 
   private ConsumptionResponse toResponse(Jwt jwt, FoodConsumption consumption) {
-    Food food = foodService.findEntity(jwt, consumption.getFoodId());
-
-    return consumption.toDto(food);
+    return foodService
+        .findEntityOptional(jwt, consumption.getFoodId())
+        .map(consumption::toDto)
+        .orElseGet(consumption::toDtoMissingFood);
   }
 }
