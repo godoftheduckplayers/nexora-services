@@ -178,6 +178,7 @@ public final class NutritionFactsSupport {
     addFact(facts, "Proteínas", values.getProteins(), "g");
     addFact(facts, "Carboidratos", values.getCarbs(), "g");
     addFact(facts, "Gorduras Saturadas", values.getSaturatedFat(), "g");
+    addFact(facts, "Gorduras Trans", values.getTransFat(), "g");
     addFact(facts, "Fibra alimentar", values.getFiber(), "g");
     addFact(facts, "Gorduras totais", values.getFat(), "g");
 
@@ -462,6 +463,7 @@ public final class NutritionFactsSupport {
     }
 
     if (nutrient.contains("gordura") && nutrient.contains("trans")) {
+      values.setTransFat(amountPer100g);
       return;
     }
 

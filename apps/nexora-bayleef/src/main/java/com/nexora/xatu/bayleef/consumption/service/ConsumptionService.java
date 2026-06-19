@@ -13,6 +13,7 @@ import com.nexora.xatu.bayleef.shared.model.NutritionValues;
 import com.nexora.xatu.bayleef.shared.service.JwtUserService;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -67,6 +68,9 @@ public class ConsumptionService {
             .findByUserIdAndConsumedOnOrderByConsumedAtDesc(userId, targetDate)
             .stream()
             .map(consumption -> toResponse(jwt, consumption))
+            .sorted(
+                Comparator.comparing(
+                    ConsumptionResponse::foodName, String.CASE_INSENSITIVE_ORDER))
             .toList();
 
     NutritionValues totals =

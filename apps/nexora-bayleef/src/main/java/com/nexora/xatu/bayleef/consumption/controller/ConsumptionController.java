@@ -9,6 +9,7 @@ import com.nexora.xatu.bayleef.shared.dto.PageResponse;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,8 @@ public class ConsumptionController {
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
           LocalDate date,
-      @PageableDefault(size = 20) Pageable pageable) {
+      @PageableDefault(size = 20, sort = "foodName", direction = Sort.Direction.ASC)
+      Pageable pageable) {
     return consumptionService.findAll(jwt, date, pageable);
   }
 

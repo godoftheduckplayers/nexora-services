@@ -7,6 +7,7 @@ import com.nexora.xatu.bayleef.food.service.FoodService;
 import com.nexora.xatu.bayleef.shared.dto.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,7 +44,8 @@ public class FoodController {
   public PageResponse<FoodResponse> findAll(
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(required = false) String name,
-      @PageableDefault(size = 20) Pageable pageable) {
+      @PageableDefault(size = 20, sort = "name", direction = Sort.Direction.ASC)
+      Pageable pageable) {
     return foodService.findAll(jwt, name, pageable);
   }
 

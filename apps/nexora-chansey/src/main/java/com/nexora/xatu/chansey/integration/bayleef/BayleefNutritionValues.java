@@ -7,5 +7,6 @@ public record BayleefNutritionValues(
     BigDecimal proteins,
     BigDecimal carbs,
     BigDecimal saturatedFat,
+    BigDecimal transFat,
     BigDecimal fat,
     BigDecimal fiber) {}

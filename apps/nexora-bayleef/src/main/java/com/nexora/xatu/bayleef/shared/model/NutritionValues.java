@@ -13,6 +13,7 @@ public class NutritionValues {
   private BigDecimal proteins;
   private BigDecimal carbs;
   private BigDecimal saturatedFat;
+  private BigDecimal transFat;
   private BigDecimal fat;
   private BigDecimal fiber;
 
@@ -27,6 +28,7 @@ public class NutritionValues {
     copy.setProteins(proteins);
     copy.setCarbs(carbs);
     copy.setSaturatedFat(saturatedFat);
+    copy.setTransFat(transFat);
     copy.setFat(fat);
     copy.setFiber(fiber);
 
@@ -76,6 +78,7 @@ public class NutritionValues {
     scaled.setProteins(scaleValue(proteins, factor));
     scaled.setCarbs(scaleValue(carbs, factor));
     scaled.setSaturatedFat(scaleValue(saturatedFat, factor));
+    scaled.setTransFat(scaleValue(transFat, factor));
     scaled.setFat(scaleValue(fat, factor));
     scaled.setFiber(scaleValue(fiber, factor));
 
@@ -94,6 +97,10 @@ public class NutritionValues {
         add(
             left == null ? null : left.getSaturatedFat(),
             right == null ? null : right.getSaturatedFat()));
+    total.setTransFat(
+        add(
+            left == null ? null : left.getTransFat(),
+            right == null ? null : right.getTransFat()));
     total.setFat(add(left == null ? null : left.getFat(), right == null ? null : right.getFat()));
     total.setFiber(
         add(left == null ? null : left.getFiber(), right == null ? null : right.getFiber()));

@@ -9,6 +9,7 @@ public record NutritionValuesRequest(
     @PositiveOrZero BigDecimal proteins,
     @PositiveOrZero BigDecimal carbs,
     @PositiveOrZero BigDecimal saturatedFat,
+    @PositiveOrZero BigDecimal transFat,
     @PositiveOrZero BigDecimal fat,
     @PositiveOrZero BigDecimal fiber) {
 
@@ -19,6 +20,7 @@ public record NutritionValuesRequest(
     values.setProteins(proteins);
     values.setCarbs(carbs);
     values.setSaturatedFat(saturatedFat);
+    values.setTransFat(transFat);
     values.setFat(fat);
     values.setFiber(fiber);
 
