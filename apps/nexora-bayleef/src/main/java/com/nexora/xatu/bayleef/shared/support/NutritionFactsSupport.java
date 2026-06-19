@@ -84,12 +84,12 @@ public final class NutritionFactsSupport {
 
     List<NutritionFact> facts = new ArrayList<>();
 
-    addFact(facts, "Valor Energético", values.getKcal(), "kcal");
+    addFact(facts, "Valor energético", values.getKcal(), "kcal");
     addFact(facts, "Proteínas", values.getProteins(), "g");
     addFact(facts, "Carboidratos", values.getCarbs(), "g");
-    addFact(facts, "Gorduras saturadas", values.getSaturatedFat(), "g");
+    addFact(facts, "Gorduras Saturadas", values.getSaturatedFat(), "g");
+    addFact(facts, "Fibra alimentar", values.getFiber(), "g");
     addFact(facts, "Gorduras totais", values.getFat(), "g");
-    addFact(facts, "Fibra Alimentar", values.getFiber(), "g");
 
     return facts;
   }
@@ -276,7 +276,7 @@ public final class NutritionFactsSupport {
         || normalized.contains("energia")
         || normalized.equals("kcal")
         || normalized.contains("calorias")) {
-      return "Valor Energético";
+      return "Valor energético";
     }
 
     if (normalized.contains("carboidrato") || normalized.contains("carbeiarato")) {
@@ -308,7 +308,7 @@ public final class NutritionFactsSupport {
     }
 
     if (normalized.contains("gordura") && normalized.contains("saturad")) {
-      return "Gorduras saturadas";
+      return "Gorduras Saturadas";
     }
 
     if (normalized.contains("gordura") || normalized.contains("lipidio")) {
@@ -320,7 +320,7 @@ public final class NutritionFactsSupport {
     }
 
     if (normalized.contains("fibra")) {
-      return "Fibra Alimentar";
+      return "Fibra alimentar";
     }
 
     if (normalized.contains("sodio") || normalized.contains("sedio") || normalized.equals("eso")) {
@@ -402,6 +402,10 @@ public final class NutritionFactsSupport {
 
     if (nutrient.contains("carboidrato")) {
       values.setCarbs(amountPer100g);
+      return;
+    }
+
+    if (nutrient.contains("gordura") && nutrient.contains("trans")) {
       return;
     }
 

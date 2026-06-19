@@ -66,7 +66,7 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     String normalized = removeAccents(line).toLowerCase();
 
     if (normalized.contains("valor energetico")) {
-      return "Valor Energético";
+      return "Valor energético";
     }
 
     if (normalized.contains("carboidratos") || normalized.contains("carbeiaratos")) {
@@ -101,7 +101,7 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     }
 
     if (normalized.contains("gorduras saturadas") || normalized.contains("saturamas")) {
-      return "Gorduras saturadas";
+      return "Gorduras Saturadas";
     }
 
     if (normalized.contains("gorduras trans") || normalized.contains("gomwas trans")) {
@@ -115,7 +115,7 @@ public abstract class AbstractNutritionParserStrategy implements NutritionParser
     if (normalized.contains("fibra alimentar")
         || normalized.contains("fibras alimentares")
         || normalized.contains("fa amena")) {
-      return "Fibra Alimentar";
+      return "Fibra alimentar";
     }
 
     if (normalized.contains("sodio") || normalized.contains("sedio") || normalized.equals("eso")) {
