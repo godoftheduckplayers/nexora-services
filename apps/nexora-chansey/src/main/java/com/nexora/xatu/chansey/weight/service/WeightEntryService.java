@@ -42,7 +42,7 @@ public class WeightEntryService {
 
     WeightEntry entry =
         weightEntryRepository
-            .findByUserIdAndRecordedOn(userId, recordedOn)
+            .findByUserIdAndRecordedOnDate(userId, recordedOn.toString())
             .map(
                 existing -> {
                   existing.apply(request);
@@ -59,7 +59,7 @@ public class WeightEntryService {
     LocalDate start = from == null ? end.minusDays(30) : from;
 
     return weightEntryRepository
-        .findByUserIdAndRecordedOnBetweenOrderByRecordedOnAsc(userId, start, end)
+        .findByUserIdAndRecordedOnInRange(userId, start.toString(), end.toString())
         .stream()
         .map(WeightEntry::toDto)
         .toList();
@@ -74,8 +74,8 @@ public class WeightEntryService {
         granularity == null ? ProgressGranularity.DAY : granularity;
 
     List<WeightEntry> entries =
-        weightEntryRepository.findByUserIdAndRecordedOnBetweenOrderByRecordedOnAsc(
-            userId, start, end);
+        weightEntryRepository.findByUserIdAndRecordedOnInRange(
+            userId, start.toString(), end.toString());
 
     List<WeightProgressPoint> points =
         switch (targetGranularity) {
