@@ -247,9 +247,7 @@ public class DashboardService {
     BigDecimal budgetAmount = calculateBudgetAmount(monthlyIncome, percentage);
     BigDecimal spentAmount =
         ledger.spentByCategory().getOrDefault(category, BigDecimal.ZERO);
-    BigDecimal fixedAmount =
-        ledger.fixedExpensesByCategory().getOrDefault(category, BigDecimal.ZERO);
-    BigDecimal totalUsed = spentAmount.add(fixedAmount);
+    BigDecimal totalUsed = spentAmount;
     BigDecimal remaining = budgetAmount.subtract(totalUsed);
     Integer progressPercent = buildProgressPercent(totalUsed, budgetAmount);
     BudgetStatus status = resolveStatus(progressPercent);
@@ -260,7 +258,7 @@ public class DashboardService {
         GoalPurposeDefaults.resolve(allocation.getCategory(), allocation.getPurpose()),
         budgetAmount,
         spentAmount,
-        fixedAmount,
+        BigDecimal.ZERO,
         totalUsed,
         remaining,
         progressPercent,

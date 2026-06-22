@@ -1,7 +1,5 @@
 package com.nexora.xatu.daffy.summary.service;
 
-import com.nexora.xatu.daffy.fixedexpense.model.FixedExpense;
-import com.nexora.xatu.daffy.fixedexpense.service.FixedExpenseService;
 import com.nexora.xatu.daffy.portfolio.model.PortfolioPosition;
 import com.nexora.xatu.daffy.portfolio.service.PortfolioService;
 import com.nexora.xatu.daffy.shared.enums.BudgetCategory;
@@ -30,17 +28,14 @@ public class MonthlySummaryService {
   private static final int MAX_PERIOD_MONTHS = 24;
 
   private final TransactionRepository transactionRepository;
-  private final FixedExpenseService fixedExpenseService;
   private final PortfolioService portfolioService;
   private final JwtUserService jwtUserService;
 
   public MonthlySummaryService(
       TransactionRepository transactionRepository,
-      FixedExpenseService fixedExpenseService,
       PortfolioService portfolioService,
       JwtUserService jwtUserService) {
     this.transactionRepository = transactionRepository;
-    this.fixedExpenseService = fixedExpenseService;
     this.portfolioService = portfolioService;
     this.jwtUserService = jwtUserService;
   }
@@ -87,14 +82,12 @@ public class MonthlySummaryService {
 
     List<Transaction> transactions =
         transactionRepository.findByUserIdAndOccurredOnBetween(userId, from, to);
-    List<FixedExpense> fixedExpenses = fixedExpenseService.findActiveForUser(userId);
     List<PortfolioPosition> positions = portfolioService.findAllForUser(userId);
 
     BigDecimal totalIncome = sumByType(transactions, TransactionType.INCOME);
     BigDecimal totalExpense = sumByType(transactions, TransactionType.EXPENSE);
     Map<BudgetCategory, BigDecimal> spentByCategory = sumExpensesByCategory(transactions);
-    Map<BudgetCategory, BigDecimal> fixedByCategory =
-        sumPendingFixedExpensesByCategory(userId, fixedExpenses, target);
+    Map<BudgetCategory, BigDecimal> fixedByCategory = emptyCategoryMap();
     applyPortfolioDepositsToSpentByCategory(spentByCategory, positions, target);
 
     return new MonthlyLedgerSummary(
@@ -245,26 +238,6 @@ public class MonthlySummaryService {
                     transaction.getCategory(),
                     transaction.getAmount(),
                     BigDecimal::add));
-
-    return totals;
-  }
-
-  private Map<BudgetCategory, BigDecimal> sumPendingFixedExpensesByCategory(
-      String userId, List<FixedExpense> fixedExpenses, YearMonth target) {
-    Map<BudgetCategory, BigDecimal> totals = emptyCategoryMap();
-    LocalDate from = target.atDay(1);
-    LocalDate to = target.atEndOfMonth();
-
-    fixedExpenses.forEach(
-        expense -> {
-          boolean alreadyPaid =
-              transactionRepository.existsByUserIdAndFixedExpenseIdAndOccurredOnBetween(
-                  userId, expense.getId(), from, to);
-
-          if (!alreadyPaid) {
-            totals.merge(expense.getCategory(), expense.getAmount(), BigDecimal::add);
-          }
-        });
 
     return totals;
   }
