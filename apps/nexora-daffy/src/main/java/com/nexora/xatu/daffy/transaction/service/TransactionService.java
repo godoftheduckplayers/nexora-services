@@ -131,6 +131,12 @@ public class TransactionService {
   }
 
   private LocalDate resolveFixedExpenseDate(int dayOfMonth, YearMonth targetMonth) {
+    YearMonth currentMonth = YearMonth.now();
+
+    if (targetMonth.equals(currentMonth)) {
+      return LocalDate.now();
+    }
+
     int safeDay = Math.min(Math.max(dayOfMonth, 1), targetMonth.lengthOfMonth());
     return targetMonth.atDay(safeDay);
   }

@@ -45,7 +45,10 @@ public class TransactionController {
       @AuthenticationPrincipal Jwt jwt,
       @RequestParam(required = false) Integer year,
       @RequestParam(required = false) Integer month,
-      @PageableDefault(size = 20, sort = "occurredOn", direction = Sort.Direction.DESC)
+      @PageableDefault(
+          size = 20,
+          sort = {"occurredAt", "occurredOn"},
+          direction = Sort.Direction.DESC)
           Pageable pageable) {
     return transactionService.findAll(jwt, year, month, pageable);
   }
