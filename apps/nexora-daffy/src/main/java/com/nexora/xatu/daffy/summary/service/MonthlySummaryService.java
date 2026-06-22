@@ -93,7 +93,8 @@ public class MonthlySummaryService {
     BigDecimal totalIncome = sumByType(transactions, TransactionType.INCOME);
     BigDecimal totalExpense = sumByType(transactions, TransactionType.EXPENSE);
     Map<BudgetCategory, BigDecimal> spentByCategory = sumExpensesByCategory(transactions);
-    Map<BudgetCategory, BigDecimal> fixedByCategory = sumFixedExpensesByCategory(fixedExpenses);
+    Map<BudgetCategory, BigDecimal> fixedByCategory =
+        sumPendingFixedExpensesByCategory(userId, fixedExpenses, target);
     applyPortfolioDepositsToSpentByCategory(spentByCategory, positions, target);
 
     return new MonthlyLedgerSummary(
@@ -248,13 +249,22 @@ public class MonthlySummaryService {
     return totals;
   }
 
-  private Map<BudgetCategory, BigDecimal> sumFixedExpensesByCategory(
-      List<FixedExpense> fixedExpenses) {
+  private Map<BudgetCategory, BigDecimal> sumPendingFixedExpensesByCategory(
+      String userId, List<FixedExpense> fixedExpenses, YearMonth target) {
     Map<BudgetCategory, BigDecimal> totals = emptyCategoryMap();
+    LocalDate from = target.atDay(1);
+    LocalDate to = target.atEndOfMonth();
 
     fixedExpenses.forEach(
-        expense ->
-            totals.merge(expense.getCategory(), expense.getAmount(), BigDecimal::add));
+        expense -> {
+          boolean alreadyPaid =
+              transactionRepository.existsByUserIdAndFixedExpenseIdAndOccurredOnBetween(
+                  userId, expense.getId(), from, to);
+
+          if (!alreadyPaid) {
+            totals.merge(expense.getCategory(), expense.getAmount(), BigDecimal::add);
+          }
+        });
 
     return totals;
   }
