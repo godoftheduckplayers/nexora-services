@@ -9,8 +9,8 @@
         <relativePath/>
     </parent>
     <groupId>com.nexora</groupId>
-    <artifactId>nexora-bayleef</artifactId>
-    <version>0.1.0</version>
+    <artifactId>nexora-daffy</artifactId>
+    <version>0.1.8</version>
     <name/>
     <description/>
     <properties>
@@ -39,7 +39,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb-test</artifactId>
@@ -67,7 +66,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <build>
         <plugins>
             <plugin>
