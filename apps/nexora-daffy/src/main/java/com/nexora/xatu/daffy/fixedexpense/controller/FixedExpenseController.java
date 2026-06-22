@@ -4,6 +4,7 @@ import com.nexora.xatu.daffy.fixedexpense.dto.request.CreateFixedExpenseRequest;
 import com.nexora.xatu.daffy.fixedexpense.dto.request.UpdateFixedExpenseRequest;
 import com.nexora.xatu.daffy.fixedexpense.dto.response.FixedExpenseResponse;
 import com.nexora.xatu.daffy.fixedexpense.service.FixedExpenseService;
+import com.nexora.xatu.daffy.transaction.dto.response.TransactionResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +39,21 @@ public class FixedExpenseController {
   }
 
   @GetMapping
-  public List<FixedExpenseResponse> findAll(@AuthenticationPrincipal Jwt jwt) {
-    return fixedExpenseService.findAll(jwt);
+  public List<FixedExpenseResponse> findAll(
+      @AuthenticationPrincipal Jwt jwt,
+      @RequestParam(required = false) Integer year,
+      @RequestParam(required = false) Integer month) {
+    return fixedExpenseService.findAll(jwt, year, month);
+  }
+
+  @PostMapping("/{id}/transactions")
+  @ResponseStatus(HttpStatus.CREATED)
+  public TransactionResponse generateTransaction(
+      @AuthenticationPrincipal Jwt jwt,
+      @PathVariable String id,
+      @RequestParam(required = false) Integer year,
+      @RequestParam(required = false) Integer month) {
+    return fixedExpenseService.generateTransaction(jwt, id, year, month);
   }
 
   @PutMapping("/{id}")

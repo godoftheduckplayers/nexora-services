@@ -1,5 +1,6 @@
 package com.nexora.xatu.daffy.transaction.model;
 
+import com.nexora.xatu.daffy.fixedexpense.model.FixedExpense;
 import com.nexora.xatu.daffy.shared.enums.BudgetCategory;
 import com.nexora.xatu.daffy.shared.enums.TransactionType;
 import com.nexora.xatu.daffy.transaction.dto.request.CreateTransactionRequest;
@@ -27,10 +28,30 @@ public class Transaction {
   private BudgetCategory category;
   private BigDecimal amount;
   private String description;
+  private String fixedExpenseId;
   private LocalDate occurredOn;
   private Instant occurredAt;
   private Instant createdAt;
   private Instant updatedAt;
+
+  public static Transaction fromFixedExpense(
+      String userId, FixedExpense expense, LocalDate occurredOn) {
+    Instant now = Instant.now();
+    Transaction transaction = new Transaction();
+
+    transaction.setUserId(userId);
+    transaction.setType(TransactionType.EXPENSE);
+    transaction.setCategory(expense.getCategory());
+    transaction.setAmount(expense.getAmount());
+    transaction.setDescription(expense.getName());
+    transaction.setFixedExpenseId(expense.getId());
+    transaction.setOccurredOn(occurredOn);
+    transaction.setOccurredAt(now);
+    transaction.setCreatedAt(now);
+    transaction.setUpdatedAt(now);
+
+    return transaction;
+  }
 
   public static Transaction from(String userId, CreateTransactionRequest request) {
     Instant occurredAt = request.occurredAt() == null ? Instant.now() : request.occurredAt();

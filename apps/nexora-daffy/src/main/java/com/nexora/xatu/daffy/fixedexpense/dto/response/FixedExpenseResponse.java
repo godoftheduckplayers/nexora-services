@@ -9,4 +9,5 @@ public record FixedExpenseResponse(
     BigDecimal amount,
     BudgetCategory category,
     Integer dayOfMonth,
-    boolean active) {}
+    boolean active,
+    boolean paidThisMonth) {}

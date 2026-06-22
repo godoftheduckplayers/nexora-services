@@ -18,4 +18,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
   List<Transaction> findByUserIdAndTypeAndOccurredOnBetween(
       String userId, TransactionType type, LocalDate from, LocalDate to);
+
+  boolean existsByUserIdAndFixedExpenseIdAndOccurredOnBetween(
+      String userId, String fixedExpenseId, LocalDate from, LocalDate to);
 }

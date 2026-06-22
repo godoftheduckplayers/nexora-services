@@ -1,5 +1,6 @@
 package com.nexora.xatu.daffy.transaction.service;
 
+import com.nexora.xatu.daffy.fixedexpense.model.FixedExpense;
 import com.nexora.xatu.daffy.shared.dto.PageResponse;
 import com.nexora.xatu.daffy.shared.service.JwtUserService;
 import com.nexora.xatu.daffy.transaction.dto.request.CreateTransactionRequest;
@@ -26,6 +27,44 @@ public class TransactionService {
       TransactionRepository transactionRepository, JwtUserService jwtUserService) {
     this.transactionRepository = transactionRepository;
     this.jwtUserService = jwtUserService;
+  }
+
+  public TransactionResponse createFromFixedExpense(
+      Jwt jwt, FixedExpense expense, YearMonth targetMonth) {
+    String userId = jwtUserService.requireUserId(jwt);
+
+    if (!expense.isActive()) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "Fixed expense is not active.");
+    }
+
+    if (!userId.equals(expense.getUserId())) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fixed expense not found.");
+    }
+
+    LocalDate occurredOn = resolveFixedExpenseDate(expense.getDayOfMonth(), targetMonth);
+
+    if (transactionRepository.existsByUserIdAndFixedExpenseIdAndOccurredOnBetween(
+        userId,
+        expense.getId(),
+        targetMonth.atDay(1),
+        targetMonth.atEndOfMonth())) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "Fixed expense already paid for this month.");
+    }
+
+    Transaction transaction = Transaction.fromFixedExpense(userId, expense, occurredOn);
+
+    return transactionRepository.save(transaction).toDto();
+  }
+
+  public boolean isFixedExpensePaidForMonth(
+      String userId, String fixedExpenseId, YearMonth targetMonth) {
+    return transactionRepository.existsByUserIdAndFixedExpenseIdAndOccurredOnBetween(
+        userId,
+        fixedExpenseId,
+        targetMonth.atDay(1),
+        targetMonth.atEndOfMonth());
   }
 
   public TransactionResponse create(Jwt jwt, CreateTransactionRequest request) {
@@ -89,5 +128,10 @@ public class TransactionService {
             : YearMonth.of(year, month);
 
     return new LocalDate[] {target.atDay(1), target.atEndOfMonth()};
+  }
+
+  private LocalDate resolveFixedExpenseDate(int dayOfMonth, YearMonth targetMonth) {
+    int safeDay = Math.min(Math.max(dayOfMonth, 1), targetMonth.lengthOfMonth());
+    return targetMonth.atDay(safeDay);
   }
 }

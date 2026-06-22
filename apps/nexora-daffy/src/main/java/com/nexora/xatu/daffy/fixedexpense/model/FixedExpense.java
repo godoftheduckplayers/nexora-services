@@ -55,7 +55,11 @@ public class FixedExpense {
   }
 
   public FixedExpenseResponse toDto() {
+    return toDto(false);
+  }
+
+  public FixedExpenseResponse toDto(boolean paidThisMonth) {
     return new FixedExpenseResponse(
-        this.id, this.name, this.amount, this.category, this.dayOfMonth, this.active);
+        this.id, this.name, this.amount, this.category, this.dayOfMonth, this.active, paidThisMonth);
   }
 }
