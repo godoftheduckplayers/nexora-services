@@ -8,6 +8,7 @@ import com.nexora.xatu.daffy.portfolio.model.PortfolioPosition;
 import com.nexora.xatu.daffy.portfolio.repository.PortfolioPositionRepository;
 import com.nexora.xatu.daffy.shared.enums.PortfolioType;
 import com.nexora.xatu.daffy.shared.service.JwtUserService;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,6 +28,7 @@ public class PortfolioService {
   }
 
   public PortfolioPositionResponse create(Jwt jwt, CreatePortfolioPositionRequest request) {
+    validateMovementAmounts(request.type(), request.investedAmount(), request.currentValue());
     String userId = jwtUserService.requireUserId(jwt);
     PortfolioPosition position = PortfolioPosition.from(userId, request);
 
@@ -54,6 +56,9 @@ public class PortfolioService {
   public PortfolioPositionResponse update(
       Jwt jwt, String id, UpdatePortfolioPositionRequest request) {
     PortfolioPosition position = findOwned(jwt, id);
+    BigDecimal currentValue =
+        request.currentValue() == null ? position.getCurrentValue() : request.currentValue();
+    validateMovementAmounts(request.type(), request.investedAmount(), currentValue);
     position.update(request);
 
     return portfolioPositionRepository.save(position).toDto();
@@ -66,6 +71,27 @@ public class PortfolioService {
 
   public List<PortfolioPosition> findAllForUser(String userId) {
     return portfolioPositionRepository.findByUserIdOrderByNameAsc(userId);
+  }
+
+  private void validateMovementAmounts(
+      PortfolioType type, BigDecimal investedAmount, BigDecimal currentValue) {
+    BigDecimal invested = investedAmount == null ? BigDecimal.ZERO : investedAmount;
+    BigDecimal current = currentValue == null ? invested : currentValue;
+    BigDecimal minimumAmount = new BigDecimal("0.01");
+
+    if (type.isGainMovement()) {
+      if (current.compareTo(minimumAmount) < 0) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST, "O valor do ganho deve ser de pelo menos 0,01.");
+      }
+
+      return;
+    }
+
+    if (invested.compareTo(minimumAmount) < 0) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST, "O valor deve ser de pelo menos 0,01.");
+    }
   }
 
   private PortfolioPosition findOwned(Jwt jwt, String id) {

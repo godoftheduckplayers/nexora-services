@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.nexora</groupId>
     <artifactId>nexora-daffy</artifactId>
-    <version>0.1.12-snapshot</version>
+    <version>0.1.13-snapshot</version>
     <name/>
     <description/>
     <properties>

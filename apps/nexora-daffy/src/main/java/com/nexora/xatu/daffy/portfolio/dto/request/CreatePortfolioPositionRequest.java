@@ -9,5 +9,5 @@ import java.math.BigDecimal;
 public record CreatePortfolioPositionRequest(
     @NotBlank String name,
     @NotNull PortfolioType type,
-    @NotNull @DecimalMin("0.01") BigDecimal investedAmount,
+    @NotNull @DecimalMin("0") BigDecimal investedAmount,
     @DecimalMin("0") BigDecimal currentValue) {}

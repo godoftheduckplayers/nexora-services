@@ -10,5 +10,9 @@ public enum PortfolioType {
   GAIN,
   LOSS,
   INVESTMENT,
-  BETTING
+  BETTING;
+
+  public boolean isGainMovement() {
+    return this == GAIN || this == INVESTMENT_GAIN;
+  }
 }
